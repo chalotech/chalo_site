@@ -1,26 +1,5 @@
 Flask==3.0.0
 Flask-SQLAlchemy==3.1.1
 Flask-Login==0.6.3
-Flask-Mail==0.9.1
-Flask-WTF==1.2.1
-Flask-Migrate==4.0.5
-python-dotenv==1.0.0
 Werkzeug==3.0.1
 SQLAlchemy==2.0.23
-email-validator==2.1.0.post1
-python-dateutil==2.8.2
-requests==2.31.0
-africastalking==1.2.5
-paypalrestsdk==1.13.1
-cryptography==41.0.7
-Pillow==10.1.0
-redis==5.0.1
-celery==5.3.6
-gunicorn==21.2.0
-flower==2.0.1  # For monitoring Celery tasks
-supervisor==4.2.5  # For process management
-pytest==7.4.3  # For testing
-pytest-cov==4.1.0  # For test coverage
-black==23.11.0  # For code formatting
-flake8==6.1.0  # For code linting
-isort==5.12.0  # For import sorting
