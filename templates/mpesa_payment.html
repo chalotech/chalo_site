@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block styles %}
+<style>
+    .payment-container {
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 20px;
+        border: 1px solid #00ff00;
+        border-radius: 8px;
+        background-color: #000000;
+        color: #00ff00;
+    }
+
+    .payment-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .payment-amount {
+        text-align: center;
+        font-size: 24px;
+        margin: 20px 0;
+    }
+
+    .payment-form {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 5px;
+        color: #00ff00;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #00ff00;
+        border-radius: 4px;
+        background-color: #000000;
+        color: #00ff00;
+        font-size: 16px;
+    }
+
+    .form-control:focus {
+        outline: none;
+        box-shadow: 0 0 5px #00ff00;
+    }
+
+    .btn-mpesa {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        background-color: #00ff00;
+        color: #000000;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .btn-mpesa:hover {
+        background-color: #00cc00;
+    }
+
+    .loading-spinner {
+        text-align: center;
+        margin: 20px 0;
+        display: none;
+    }
+
+    .error-message {
+        color: #ff0000;
+        text-align: center;
+        margin: 20px 0;
+        display: none;
+    }
+
+    .success-message {
+        color: #00ff00;
+        text-align: center;
+        margin: 20px 0;
+        display: none;
+    }
+
+    .back-link {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .back-link a {
+        color: #00ff00;
+        text-decoration: none;
+    }
+
+    .back-link a:hover {
+        text-decoration: underline;
+    }
+
+    .mpesa-instructions {
+        margin: 20px 0;
+        padding: 15px;
+        border: 1px solid #00ff00;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .mpesa-instructions ol {
+        margin: 10px 0 0 20px;
+        padding: 0;
+    }
+
+    .mpesa-instructions li {
+        margin-bottom: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="payment-container">
+    <div class="payment-header">
+        <h2>M-Pesa Payment</h2>
+        <p>{{ file.name }}</p>
+    </div>
+
+    <div class="payment-amount">
+        KES {{ "%.2f"|format(file.price * 145) }}
+    </div>
+
+    <div class="mpesa-instructions">
+        <strong>Instructions:</strong>
+        <ol>
+            <li>Enter your M-Pesa registered phone number below</li>
+            <li>Click "Pay with M-Pesa"</li>
+            <li>Wait for the M-Pesa prompt on your phone</li>
+            <li>Enter your M-Pesa PIN to complete the payment</li>
+        </ol>
+    </div>
+
+    <form id="mpesa-form" class="payment-form">
+        <div class="form-group">
+            <label for="phone" class="form-label">Phone Number (e.g., 254712345678)</label>
+            <input type="tel" id="phone" name="phone" class="form-control" 
+                   pattern="^254[0-9]{9}$" placeholder="254712345678" required>
+        </div>
+
+        <button type="submit" class="btn-mpesa">Pay with M-Pesa</button>
+    </form>
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="loading-spinner">
+        <div class="spinner-border text-success" role="status">
+            <span class="visually-hidden">Processing payment...</span>
+        </div>
+        <p>Initiating M-Pesa payment...</p>
+    </div>
+
+    <!-- Error Message -->
+    <div id="error-message" class="error-message">
+        <p></p>
+    </div>
+
+    <!-- Success Message -->
+    <div id="success-message" class="success-message">
+        <p></p>
+    </div>
+
+    <div class="back-link">
+        <a href="{{ url_for('payment', purchase_id=purchase.id) }}">
+            ← Choose Different Payment Method
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function showLoading() {
+        document.getElementById('loading-spinner').style.display = 'block';
+        document.getElementById('error-message').style.display = 'none';
+        document.getElementById('success-message').style.display = 'none';
+    }
+
+    function hideLoading() {
+        document.getElementById('loading-spinner').style.display = 'none';
+    }
+
+    function showError(message) {
+        const errorDiv = document.getElementById('error-message');
+        errorDiv.querySelector('p').textContent = message;
+        errorDiv.style.display = 'block';
+        hideLoading();
+    }
+
+    function showSuccess(message) {
+        const successDiv = document.getElementById('success-message');
+        successDiv.querySelector('p').textContent = message;
+        successDiv.style.display = 'block';
+        hideLoading();
+    }
+
+    document.getElementById('mpesa-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const phoneNumber = document.getElementById('phone').value;
+        if (!phoneNumber.match(/^254[0-9]{9}$/)) {
+            showError('Please enter a valid phone number starting with 254');
+            return;
+        }
+
+        showLoading();
+
+        try {
+            const response = await fetch('{{ url_for("process_mpesa") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    purchase_id: {{ purchase.id }},
+                    phone_number: phoneNumber
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                showSuccess('M-Pesa payment request sent. Please check your phone for the payment prompt.');
+                
+                // Start polling for payment status
+                pollPaymentStatus();
+            } else {
+                throw new Error(data.message || 'Failed to initiate M-Pesa payment');
+            }
+        } catch (error) {
+            showError(error.message || 'An error occurred. Please try again.');
+        }
+    });
+
+    async function pollPaymentStatus() {
+        const maxAttempts = 30;
+        let attempts = 0;
+        
+        const checkStatus = async () => {
+            try {
+                const response = await fetch(`{{ url_for("check_mpesa_status", purchase_id=purchase.id) }}`);
+                const data = await response.json();
+                
+                if (data.status === 'completed') {
+                    window.location.href = data.redirect_url;
+                    return;
+                } else if (data.status === 'failed') {
+                    showError('Payment failed: ' + data.message);
+                    return;
+                }
+                
+                attempts++;
+                if (attempts < maxAttempts) {
+                    setTimeout(checkStatus, 2000); // Check every 2 seconds
+                } else {
+                    showError('Payment verification timeout. If you completed the payment, please contact support.');
+                }
+            } catch (error) {
+                showError('Error checking payment status. Please contact support if payment was completed.');
+            }
+        };
+        
+        checkStatus();
+    }
+</script>
+{% endblock %}

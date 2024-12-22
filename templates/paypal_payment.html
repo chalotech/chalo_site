@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block styles %}
+<style>
+    .payment-container {
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 20px;
+        border: 1px solid #00ff00;
+        border-radius: 8px;
+        background-color: #000000;
+        color: #00ff00;
+    }
+
+    .payment-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .payment-amount {
+        text-align: center;
+        font-size: 24px;
+        margin: 20px 0;
+    }
+
+    .payment-buttons {
+        margin: 30px 0;
+        text-align: center;
+    }
+
+    #paypal-button-container {
+        margin: 20px auto;
+        max-width: 400px;
+    }
+
+    .loading-spinner {
+        text-align: center;
+        margin: 20px 0;
+        display: none;
+    }
+
+    .error-message {
+        color: #ff0000;
+        text-align: center;
+        margin: 20px 0;
+        display: none;
+    }
+
+    .back-link {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .back-link a {
+        color: #00ff00;
+        text-decoration: none;
+    }
+
+    .back-link a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="payment-container">
+    <div class="payment-header">
+        <h2>PayPal Payment</h2>
+        <p>{{ file.name }}</p>
+    </div>
+
+    <div class="payment-amount">
+        USD {{ "%.2f"|format(file.price) }}
+    </div>
+
+    <div class="payment-buttons">
+        <!-- PayPal Button Container -->
+        <div id="paypal-button-container"></div>
+
+        <!-- Loading Spinner -->
+        <div id="loading-spinner" class="loading-spinner">
+            <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">Processing payment...</span>
+            </div>
+            <p>Processing your payment...</p>
+        </div>
+
+        <!-- Error Message -->
+        <div id="error-message" class="error-message">
+            <p></p>
+        </div>
+    </div>
+
+    <div class="back-link">
+        <a href="{{ url_for('payment', purchase_id=purchase.id) }}">
+            ← Choose Different Payment Method
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- PayPal SDK -->
+<script src="https://www.paypal.com/sdk/js?client-id={{ client_id }}&currency=USD&intent=capture"></script>
+
+<script>
+    function showLoading() {
+        document.getElementById('loading-spinner').style.display = 'block';
+        document.getElementById('error-message').style.display = 'none';
+    }
+
+    function hideLoading() {
+        document.getElementById('loading-spinner').style.display = 'none';
+    }
+
+    function showError(message) {
+        const errorDiv = document.getElementById('error-message');
+        errorDiv.querySelector('p').textContent = message;
+        errorDiv.style.display = 'block';
+        hideLoading();
+    }
+
+    function initPayPalButton() {
+        if (!paypal) {
+            showError('PayPal failed to load. Please refresh the page.');
+            return;
+        }
+
+        paypal.Buttons({
+            style: {
+                color: 'gold',
+                shape: 'rect',
+                label: 'paypal',
+                layout: 'vertical'
+            },
+
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        description: '{{ file.name }}',
+                        amount: {
+                            currency_code: 'USD',
+                            value: '{{ "%.2f"|format(file.price) }}'
+                        }
+                    }]
+                });
+            },
+
+            onApprove: function(data, actions) {
+                showLoading();
+                return actions.order.capture().then(function(orderData) {
+                    return fetch('{{ url_for("process_paypal") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            purchase_id: {{ purchase.id }},
+                            order_id: orderData.id
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.href = data.redirect_url;
+                        } else {
+                            throw new Error(data.message || 'Payment failed');
+                        }
+                    })
+                    .catch(error => {
+                        showError(error.message || 'Payment processing failed. Please try again.');
+                    });
+                });
+            },
+
+            onError: function(err) {
+                console.error('PayPal error:', err);
+                showError('An error occurred with PayPal. Please try again.');
+            }
+        }).render('#paypal-button-container');
+    }
+
+    // Initialize PayPal button when the page loads
+    if (document.readyState === 'complete') {
+        initPayPalButton();
+    } else {
+        window.addEventListener('load', initPayPalButton);
+    }
+</script>
+{% endblock %}

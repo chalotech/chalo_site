@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Video Generator</title>
+    <style>
+        body { margin: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        canvas { max-width: 100%; }
+    </style>
+</head>
+<body>
+    <canvas id="videoCanvas" width="1920" height="1080"></canvas>
+    <script>
+        const canvas = document.getElementById('videoCanvas');
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+
+        // Create MediaRecorder
+        const stream = canvas.captureStream(30);
+        const recorder = new MediaRecorder(stream, {
+            mimeType: 'video/webm;codecs=vp9',
+            videoBitsPerSecond: 5000000
+        });
+
+        const chunks = [];
+        recorder.ondataavailable = e => chunks.push(e.data);
+        recorder.onstop = () => {
+            const blob = new Blob(chunks, { type: 'video/webm' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ad.webm';
+            a.click();
+        };
+
+        // Animation variables
+        let startTime = null;
+        const duration = 60; // 60 seconds
+        const fps = 30;
+        let frame = 0;
+
+        // Particle system
+        const particles = [];
+        for (let i = 0; i < 100; i++) {
+            particles.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                size: Math.random() * 3 + 1,
+                speedX: Math.random() * 2 - 1,
+                speedY: Math.random() * 2 - 1
+            });
+        }
+
+        function updateParticles() {
+            particles.forEach(p => {
+                p.x += p.speedX;
+                p.y += p.speedY;
+                
+                if (p.x < 0) p.x = width;
+                if (p.x > width) p.x = 0;
+                if (p.y < 0) p.y = height;
+                if (p.y > height) p.y = 0;
+            });
+        }
+
+        function drawParticles() {
+            particles.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.fill();
+            });
+        }
+
+        function drawFrame(timestamp) {
+            if (!startTime) startTime = timestamp;
+            const progress = (timestamp - startTime) / 1000;
+
+            // Clear canvas
+            ctx.fillStyle = 'rgb(30, 30, 50)';
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw animated gradient background
+            const gradient = ctx.createLinearGradient(0, 0, width, height);
+            const hue1 = (progress * 20) % 360;
+            const hue2 = (hue1 + 60) % 360;
+            gradient.addColorStop(0, `hsla(${hue1}, 70%, 50%, 0.5)`);
+            gradient.addColorStop(1, `hsla(${hue2}, 70%, 50%, 0.5)`);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            // Update and draw particles
+            updateParticles();
+            drawParticles();
+
+            // Draw text
+            const centerY = height / 2;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Main title with glow effect
+            const titleText = 'Welcome to Chalo Site';
+            const titleY = centerY - 50 + Math.sin(progress * 2) * 10;
+            
+            // Glow effect
+            ctx.font = 'bold 100px Arial';
+            ctx.fillStyle = 'rgba(110, 142, 251, 0.3)';
+            ctx.fillText(titleText, width/2, titleY);
+            
+            ctx.font = 'bold 90px Arial';
+            ctx.fillStyle = 'white';
+            ctx.fillText(titleText, width/2, titleY);
+
+            // Subtitle
+            ctx.font = '40px Arial';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.fillText('Your One-Stop Shop for Digital Downloads', width/2, titleY + 100);
+
+            // Record frame
+            frame++;
+            if (progress < duration) {
+                requestAnimationFrame(drawFrame);
+            } else {
+                recorder.stop();
+            }
+        }
+
+        // Start recording and animation
+        recorder.start();
+        requestAnimationFrame(drawFrame);
+    </script>
+</body>
+</html>

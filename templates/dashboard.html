@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Your Dashboard</h2>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Your Purchases</h3>
+                </div>
+                <div class="card-body">
+                    {% if purchases %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>File Name</th>
+                                        <th>Purchase Date</th>
+                                        <th>Payment Method</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for purchase in purchases %}
+                                    <tr>
+                                        <td>{{ purchase.file.name }}</td>
+                                        <td>{{ purchase.purchase_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>{{ purchase.payment_method }}</td>
+                                        <td>
+                                            <span class="badge badge-{{ 'success' if purchase.payment_status == 'completed' else 'warning' }}">
+                                                {{ purchase.payment_status }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('download_file', file_id=purchase.file.id) }}" 
+                                               class="btn btn-sm btn-primary">
+                                                Download
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">You haven't made any purchases yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

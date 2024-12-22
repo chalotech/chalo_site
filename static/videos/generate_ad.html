@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Advertisement</title>
+    <style>
+        canvas {
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="adCanvas" width="800" height="300"></canvas>
+    <script>
+        const canvas = document.getElementById('adCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set gradient background
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        gradient.addColorStop(0, '#6e8efb');
+        gradient.addColorStop(1, '#a777e3');
+        
+        // Animation function
+        function draw(time) {
+            // Clear canvas
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Add text
+            ctx.font = 'bold 48px Arial';
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Animate text position
+            const y = Math.sin(time / 1000) * 20 + canvas.height / 2;
+            ctx.fillText('Welcome to Chalo Site', canvas.width / 2, y);
+            
+            // Add subtitle
+            ctx.font = '24px Arial';
+            ctx.fillText('Your One-Stop Shop for Digital Downloads', canvas.width / 2, y + 50);
+            
+            // Request next frame
+            requestAnimationFrame(draw);
+        }
+        
+        // Start animation
+        requestAnimationFrame(draw);
+    </script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Purchase - {{ file.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .purchase-section {
+        padding: 2rem 0;
+        min-height: calc(100vh - 60px);
+        background-color: #f8f9fa;
+    }
+    .purchase-card {
+        border: none;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        background-color: white;
+    }
+    .file-details {
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+    .price-tag {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #28a745;
+    }
+    .currency-note {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-top: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="purchase-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card purchase-card">
+                    <div class="card-header">
+                        <h3 class="text-center mb-0">Confirm Purchase</h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- File Details -->
+                        <div class="file-details">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h4>{{ file.name }}</h4>
+                                    <p class="text-muted">{{ file.description }}</p>
+                                    <div class="price-tag">USD {{ "%.2f"|format(file.price) }}</div>
+                                    <div class="currency-note">Approximately KES {{ "%.2f"|format(file.price * 145) }}</div>
+                                </div>
+                                {% if file.preview_image %}
+                                <div class="col-md-4">
+                                    <img src="{{ url_for('static', filename=file.preview_image) }}" 
+                                         alt="{{ file.name }}" 
+                                         class="img-fluid rounded">
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Purchase Form -->
+                        <form method="POST" action="{{ url_for('purchase', file_id=file.id) }}">
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    Continue to Payment
+                                </button>
+                                <a href="{{ url_for('file_details', file_id=file.id) }}" class="btn btn-link">
+                                    Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Manage FAQs - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .faq-item {
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    .faq-content {
+        margin-bottom: 1rem;
+    }
+    .edit-form {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="text-center mb-5">Manage FAQs</h1>
+    
+    <!-- Add FAQ Form -->
+    <div class="card mb-5">
+        <div class="card-header">
+            <h3 class="mb-0">Add New FAQ</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                <input type="hidden" name="action" value="add">
+                <div class="mb-3">
+                    <label for="question" class="form-label">Question</label>
+                    <input type="text" class="form-control" id="question" name="question" required>
+                </div>
+                <div class="mb-3">
+                    <label for="answer" class="form-label">Answer</label>
+                    <textarea class="form-control" id="answer" name="answer" rows="3" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="order" class="form-label">Display Order</label>
+                    <input type="number" class="form-control" id="order" name="order" value="0" min="0">
+                    <div class="form-text">Lower numbers will appear first</div>
+                </div>
+                <button type="submit" class="btn btn-primary">Add FAQ</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- FAQ List -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="mb-0">Existing FAQs</h3>
+        </div>
+        <div class="card-body">
+            {% if faqs %}
+                {% for faq in faqs %}
+                <div class="faq-item">
+                    <form method="POST" class="edit-form" style="display: none;">
+                        <input type="hidden" name="action" value="edit">
+                        <input type="hidden" name="faq_id" value="{{ faq.id }}">
+                        <div class="mb-3">
+                            <label class="form-label">Question</label>
+                            <input type="text" class="form-control" name="question" value="{{ faq.question }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Answer</label>
+                            <textarea class="form-control" name="answer" rows="3" required>{{ faq.answer }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Display Order</label>
+                            <input type="number" class="form-control" name="order" value="{{ faq.order }}" min="0">
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-success">Save Changes</button>
+                            <button type="button" class="btn btn-secondary cancel-edit">Cancel</button>
+                        </div>
+                    </form>
+                    
+                    <div class="faq-content">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h4 class="mb-0">{{ faq.question }}</h4>
+                            <span class="badge bg-secondary">Order: {{ faq.order }}</span>
+                        </div>
+                        <p class="mb-3">{{ faq.answer }}</p>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-primary edit-faq">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <form method="POST" class="d-inline">
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="faq_id" value="{{ faq.id }}">
+                                <button type="submit" class="btn btn-sm btn-danger" 
+                                        onclick="return confirm('Are you sure you want to delete this FAQ?')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-4">
+                    <p class="lead mb-0">No FAQs added yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Edit FAQ functionality
+    document.querySelectorAll('.edit-faq').forEach(button => {
+        button.addEventListener('click', function() {
+            const faqItem = this.closest('.faq-item');
+            faqItem.querySelector('.faq-content').style.display = 'none';
+            faqItem.querySelector('.edit-form').style.display = 'block';
+        });
+    });
+    
+    // Cancel edit functionality
+    document.querySelectorAll('.cancel-edit').forEach(button => {
+        button.addEventListener('click', function() {
+            const faqItem = this.closest('.faq-item');
+            faqItem.querySelector('.faq-content').style.display = 'block';
+            faqItem.querySelector('.edit-form').style.display = 'none';
+        });
+    });
+});
+</script>
+{% endblock %}

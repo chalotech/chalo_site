@@ -1,0 +1,162 @@
+:root {
+    /* Light Theme Colors */
+    --bg-primary-light: #f8f9fa;
+    --bg-secondary-light: #ffffff;
+    --text-primary-light: #333333;
+    --text-secondary-light: #666666;
+    --border-light: #e0e0e0;
+    --shadow-light: rgba(0, 0, 0, 0.1);
+    --gradient-light: linear-gradient(135deg, #6e8efb, #a777e3);
+    --card-bg-light: #ffffff;
+    
+    /* Dark Theme Colors */
+    --bg-primary-dark: #1a1a1a;
+    --bg-secondary-dark: #2d2d2d;
+    --text-primary-dark: #ffffff;
+    --text-secondary-dark: #cccccc;
+    --border-dark: #404040;
+    --shadow-dark: rgba(0, 0, 0, 0.3);
+    --gradient-dark: linear-gradient(135deg, #4a5d8f, #6b4c8c);
+    --card-bg-dark: #2d2d2d;
+    
+    /* Transition */
+    --theme-transition: all 0.3s ease-in-out;
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--gradient-light);
+    border: none;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 4px 15px var(--shadow-light);
+    transition: var(--theme-transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle i {
+    color: white;
+    font-size: 1.5rem;
+    transition: var(--theme-transition);
+}
+
+/* Dark Theme Styles */
+[data-theme="dark"] {
+    --bg-primary: var(--bg-primary-dark);
+    --bg-secondary: var(--bg-secondary-dark);
+    --text-primary: var(--text-primary-dark);
+    --text-secondary: var(--text-secondary-dark);
+    --border: var(--border-dark);
+    --shadow: var(--shadow-dark);
+    --gradient: var(--gradient-dark);
+    --card-bg: var(--card-bg-dark);
+}
+
+/* Light Theme Styles */
+[data-theme="light"] {
+    --bg-primary: var(--bg-primary-light);
+    --bg-secondary: var(--bg-secondary-light);
+    --text-primary: var(--text-primary-light);
+    --text-secondary: var(--text-secondary-light);
+    --border: var(--border-light);
+    --shadow: var(--shadow-light);
+    --gradient: var(--gradient-light);
+    --card-bg: var(--card-bg-light);
+}
+
+/* Apply Theme Colors */
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: var(--theme-transition);
+}
+
+.navbar {
+    background-color: var(--bg-secondary) !important;
+    box-shadow: 0 2px 10px var(--shadow);
+}
+
+.navbar-brand, .nav-link {
+    color: var(--text-primary) !important;
+}
+
+.card {
+    background-color: var(--card-bg);
+    border-color: var(--border);
+}
+
+.search-container {
+    background: var(--gradient);
+}
+
+.search-input {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.search-input::placeholder {
+    color: var(--text-secondary);
+}
+
+.search-suggestions {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+}
+
+.suggestion-item {
+    color: var(--text-primary);
+}
+
+.suggestion-item:hover {
+    background: var(--bg-primary);
+}
+
+.file-card {
+    background: var(--card-bg);
+}
+
+.file-name {
+    color: var(--text-primary);
+}
+
+.file-description {
+    color: var(--text-secondary);
+}
+
+.pagination .page-link {
+    background-color: var(--bg-secondary);
+    border-color: var(--border);
+    color: var(--text-primary);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--gradient);
+    border-color: transparent;
+    color: white;
+}
+
+/* Dark Mode Specific Adjustments */
+[data-theme="dark"] .search-input {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .search-btn {
+    background: var(--gradient-dark);
+}
+
+[data-theme="dark"] .file-card {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Animation for theme transition */
+.theme-transition * {
+    transition: var(--theme-transition);
+}

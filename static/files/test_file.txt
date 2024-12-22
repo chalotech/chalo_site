@@ -1,0 +1,9 @@
+This is a test file for the secure marketplace.
+It contains some sample text to demonstrate the file upload and download functionality.
+
+Features of our marketplace:
+1. Secure file storage
+2. User authentication
+3. File preview
+4. Comments and ratings
+5. Purchase tracking

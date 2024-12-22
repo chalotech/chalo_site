@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="240px" height="120px" viewBox="0 0 240 120" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M30,90 L210,90 C225,90 240,75 240,60 L240,30 C240,15 225,0 210,0 L180,0 C165,0 150,15 135,30 L105,30 C90,15 75,0 60,0 L30,0 C15,0 0,15 0,30 L0,60 C0,75 15,90 30,90 Z" fill="#FF0000"/>
+        <circle cx="60" cy="90" r="20" fill="#333333"/>
+        <circle cx="180" cy="90" r="20" fill="#333333"/>
+        <path d="M90,30 L150,30 L150,0 L90,0 Z" fill="#FFFFFF"/>
+    </g>
+</svg>
